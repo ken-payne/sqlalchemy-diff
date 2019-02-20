@@ -9,15 +9,28 @@ from sqlalchemy_utils import create_database, drop_database, database_exists
 
 
 TablesInfo = namedtuple(
-    'TablesInfo', ['left', 'right', 'left_only', 'right_only', 'common'])
+    'TablesInfo', ['left', 'right', 'left_only', 'right_only', 'common']
+)
 """Represent information about the tables in a comparison between two
 databases.  It's meant for internal use. """
 
-
 DiffResult = namedtuple(
-    'DiffResult', ['left_only', 'right_only', 'common', 'diff'])
+    'DiffResult', ['left_only', 'right_only', 'common', 'diff']
+)
 """Represent information about table properties in a comparison between
 tables from two databases.  It's meant for internal use. """
+
+TargetSchema = namedtuple(
+    'TargetSchema', ['left_schema', 'right_schema']
+)
+"""Represent information about schemas to target in a comparison between
+tables from two databases.  It's meant for internal use. """
+
+ExceptionMap = namedtuple(
+    'ExceptionMap', ['left_name', 'right_name']
+)
+"""Represent information about name mismatch exceptions in a comparison between
+tables and columns from two databases.  It's meant for internal use. """
 
 
 class InspectorFactory(object):
@@ -110,9 +123,10 @@ class IgnoreManager:
 
     allowed_identifiers = ['pk', 'fk', 'idx', 'col', 'cons', 'enum']
 
-    def __init__(self, ignores, separator=None):
+    def __init__(self, ignores, separator=None, schema=None):
         self.separator = separator or '.'
         self.parse(ignores or [])
+        self.schema = schema or None
 
     def parse(self, ignores):
         ignore, tables = {}, set()
